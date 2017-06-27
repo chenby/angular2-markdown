@@ -17,6 +17,7 @@ export class MarkdownComponent implements OnInit {
     private _data: string;
     private _md: any;
     private _ext: string;
+    private _render: Function = function(){};//onrender默认为空
     changeLog: string[] = [];
 
     constructor(
@@ -27,6 +28,11 @@ export class MarkdownComponent implements OnInit {
 
     ngOnInit() {
 
+    }
+
+    @Input()
+    set render(value:Function) {
+       this._render = value; 
     }
 
     @Input()
@@ -46,6 +52,7 @@ export class MarkdownComponent implements OnInit {
     onDataChange(data:string){
       this.el.nativeElement.innerHTML = this.mdService.compile(data);
       Prism.highlightAll(false);
+      this._render(this.el.nativeElement);//onrender处理函数
     }
 
     /**
@@ -63,6 +70,7 @@ export class MarkdownComponent implements OnInit {
       this._md = this.prepare(this.el.nativeElement.innerHTML);
       this.el.nativeElement.innerHTML = this.mdService.compile(this._md);
       Prism.highlightAll(false);
+      this._render(this.el.nativeElement);//onrender处理函数
     }
 
     /**
@@ -75,6 +83,7 @@ export class MarkdownComponent implements OnInit {
                 this._md = this._ext !== 'md' ? '```' + this._ext + '\n' + data + '\n```' : data;
                 this.el.nativeElement.innerHTML = this.mdService.compile(this.prepare(this._md));
                 Prism.highlightAll(false);
+                this._render(this.el.nativeElement);//onrender处理函数
             },
             err => this.handleError);
     }
@@ -94,15 +103,7 @@ export class MarkdownComponent implements OnInit {
         if (!raw) {
             return '';
         }
-        if (this._ext === 'md' || !this.path) {
-            let isCodeBlock = false;
-            return raw.split('\n').map((line: string) => {
-                if (this.trimLeft(line).substring(0, 3) === "```") {
-                    isCodeBlock = !isCodeBlock;
-                }
-                return isCodeBlock ? line : line.trim();
-            }).join('\n');
-        }
+
         return raw.replace(/\"/g, '\'');
     }
 
