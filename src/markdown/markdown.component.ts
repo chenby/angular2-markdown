@@ -38,7 +38,6 @@ export class MarkdownComponent implements OnInit {
     @Input()
     set path(value:string) {
       this._path = value;
-      this.onPathChange();
     }
 
     @Input()
